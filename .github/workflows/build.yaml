@@ -1,4 +1,4 @@
-name: CI
+name: build.yaml Build
  
 on: workflow_dispatch # when to trigger this. Here, manually
 jobs:
