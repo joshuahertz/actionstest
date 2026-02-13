@@ -32,6 +32,6 @@ jobs:
       with:
         name: my-artifact
         path: |
-          ~/
+          ~/build/release/*
         compression-level: 0
 
