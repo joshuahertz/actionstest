@@ -25,8 +25,5 @@ jobs:
     - uses: actions/checkout@v3    # Actually check out the sources. GH Actions can run for events that may not require
                                    # sources (e.g. when someone comments on an issue)
 
-    # Here we call CMake manually, there are solutions for that in the Marketplace: https://github.com/marketplace/actions/run-cmake
     - name: Build
-      # We don't need to set up the environment variable for CMake to see Qt because the install-qt-action
-      # sets up the necessary variables automatically
       run: qmake qt-qmake-example-project.pro
