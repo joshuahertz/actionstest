@@ -1,13 +1,10 @@
-name: build.yaml Build
+name: Build
  
 on: workflow_dispatch # when to trigger this. Here, manually
 jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    
-    - name: Install jom
-      run: choco install jom
       
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
@@ -27,17 +24,28 @@ jobs:
            Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
            scoop bucket add extras
            scoop install nsis
-
+    
+    - name: Install jom
+      run: choco install jom
+      
     - name: QMake
       run: qmake qt-qmake-example-project.pro CONFIG+=release
 
     - name: Compile
       run: jom
 
+    - name: Find exe
+      id: find_exe
+      run: |
+        $exe = Get-ChildItem -Recurse -Filter "qt-qmake-test.exe" | Select-Object -First 1
+        echo "EXE_PATH=$($exe.FullName)" >> $env:GITHUB_OUTPUT
+        echo "EXE_DIR=$($exe.DirectoryName)" >> $env:GITHUB_OUTPUT
+        Write-Host "Found exe at: $($exe.FullName)"
+          
     - name: Deploy
       run: |
            mkdir bin
-           move build/qt-qmake-test.exe bin
+           move "${{ steps.find_exe.outputs.EXE_PATH }}" bin
            windeployqt bin/qt-qmake-test.exe --compiler-runtime
 #           xcopy deploy\windows\resources\icon.ico "${{env.APPLICATION}}"
 
@@ -52,5 +60,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: qt-qmake-test
-        path: bin/qt-qmake-test.exe
+        path: bin/
         compression-level: 0
