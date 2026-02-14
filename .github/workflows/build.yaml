@@ -2,16 +2,13 @@ name: build.yaml Build
  
 on: workflow_dispatch # when to trigger this. Here, manually
 jobs:
-  build_and_test:
-    name: "Build and test"
-    strategy:
-      matrix:
-        os: [windows-latest] # we build on GitHub-provided Windows image
-    runs-on: ${{ matrix.os }} # use value from the matrix
+  build-windows:
+    runs-on: windows-latest
     steps:
-    - name: Install Ninja (windows)    # Ninja is not available in GitHub-provided images,
-                                       # see https://github.com/actions/runner-images/issues/514
-      run: choco install ninja         # So let's install it through Chocolatey
+#    - name: Install Ninja (windows)    # Ninja is not available in GitHub-provided images,
+#                                       # see https://github.com/actions/runner-images/issues/514
+#      run: choco install ninja         # So let's install it through Chocolatey
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
@@ -25,13 +22,28 @@ jobs:
     - uses: actions/checkout@v3    # Actually check out the sources. GH Actions can run for events that may not require
                                    # sources (e.g. when someone comments on an issue)
 
-    - name: Build
-      run: qmake qt-qmake-example-project.pro
+    - name: Install NSIS
+      run: |
+           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+           scoop bucket add extras
+           scoop install nsis
 
-    - uses: actions/upload-artifact@v4
+    - name: Compile
+      run: qmake qt-qmake-example-project.pro CONFIG+=release
+           nmake
+
+    - name: Deploy
+      run: |
+           mkdir bin
+           move build/${{env.EXECUTABLE}}.exe bin
+           windeployqt bin/${{env.EXECUTABLE}}.exe -qmldir="${{env.QML_DIR_WIN}}" --compiler-runtime
+           mkdir "${{env.APPLICATION}}"
+           move bin "${{env.APPLICATION}}"
+#           xcopy deploy\windows\resources\icon.ico "${{env.APPLICATION}}"
+
+    - name: Upload exe
+      uses: actions/upload-artifact@v4
       with:
-        name: my-artifact
-        path: |
-          ~/build/release/*
+        name: ${{env.EXECUTABLE}}.exe
+        path: deploy/windows/nsis/${{env.EXECUTABLE}}-${{env.VERSION}}-Windows.exe
         compression-level: 0
-
