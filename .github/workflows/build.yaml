@@ -35,15 +35,22 @@ jobs:
     - name: Deploy
       run: |
            mkdir bin
-           move build/${{env.EXECUTABLE}}.exe bin
-           windeployqt bin/${{env.EXECUTABLE}}.exe -qmldir="${{env.QML_DIR_WIN}}" --compiler-runtime
-           mkdir "${{env.APPLICATION}}"
-           move bin "${{env.APPLICATION}}"
+           move build/qt-qmake-test.exe bin
+           windeployqt bin/qt-qmake-test.exe --compiler-runtime
+           mkdir "qt-qmake-test"
+           move bin "qt-qmake-test"
 #           xcopy deploy\windows\resources\icon.ico "${{env.APPLICATION}}"
+
+#    - name: Make NSIS installer
+#      run: |
+#           move "qt-qmake-test" deploy\windows\nsis\
+#           cd deploy\windows\nsis
+#           makensis /X"SetCompressor /FINAL lzma" setup.nsi
+#           ren *.exe qt-qmake-test.exe
 
     - name: Upload exe
       uses: actions/upload-artifact@v4
       with:
-        name: ${{env.EXECUTABLE}}.exe
-        path: deploy/windows/nsis/${{env.EXECUTABLE}}-${{env.VERSION}}-Windows.exe
+        name: qt-qmake-test.exe
+        path: bin/qt-qmake-test.exe
         compression-level: 0
