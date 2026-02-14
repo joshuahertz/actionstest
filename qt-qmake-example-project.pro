@@ -33,8 +33,6 @@ FORMS += \
 
 TARGET = $$TARGET_NAME
 
-include(../res/res.pri)
-
 SUBDIRS = \
     src \
     app \
