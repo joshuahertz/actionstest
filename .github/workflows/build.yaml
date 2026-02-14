@@ -32,7 +32,7 @@ jobs:
       run: qmake qt-qmake-example-project.pro CONFIG+=release
 
     - name: Compile
-      run: make
+      run: nmake
 
     - name: Deploy
       run: |
